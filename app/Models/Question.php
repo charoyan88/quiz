@@ -14,4 +14,13 @@ class Question extends Model
     {
         return $this->hasMany(Answer::class);
     }
+    public function scopeNext($query, $currentId)
+    {
+        return $query->where('id', '>', $currentId)->orderBy('id', 'asc')->first();
+    }
+
+    public function scopePrevious($query, $currentId)
+    {
+        return $query->where('id', '<', $currentId)->orderBy('id', 'desc')->first();
+    }
 }

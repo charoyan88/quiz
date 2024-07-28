@@ -2,29 +2,45 @@
 
 @section('title', 'Create Question')
 <style>
-    .green { background-color: green; color: white; }
-    .red { background-color: red; color: white; }
+    .green {
+        background-color: green;
+        color: white;
+    }
+
+    .red {
+        background-color: red;
+        color: white;
+    }
 </style>
 @section('content')
     <h1>{{ $question->description }}</h1>
     <ul>
         @foreach ($question->answers as $answer)
             <button
-                id="answerButton_{{ $answer->id }}"
-                onclick="handleAnswerClick('{{ route('checkAnswer', $answer->id) }}', {{ $answer->id }})">
+                    id="answerButton_{{ $answer->id }}"
+                    onclick="handleAnswerClick('{{ route('checkAnswer', $answer->id) }}', {{ $answer->id }})">
                 {{ $answer->name }}
             </button>
         @endforeach
     </ul>
-    <div id="timer">200 seconds remaining</div>
+    <div id="timer">{{$question->time_total}} seconds remaining</div>
+    @php($next = \App\Models\Question::next($question->id))
+    @if($next->count())
+        <a id="next" href="{{route('question',$next)}}" class="btn btn-primary"
+           style="display:none">Next</a>
+    @else
+        <a id="next" href="{{route('result',Session::get('student_id'))}}" class="btn btn-primary"
+           style="display:none">Finish</a>
+    @endif
 @endsection
 @push('scripts')
     <script>
-        let timer = 200;
+        let timer = '{{$question->time_total}}';
+        let interval;
 
         function startTimer() {
             const timerElement = document.getElementById('timer');
-            const interval = setInterval(() => {
+            interval = setInterval(() => {
                 timer--;
                 timerElement.textContent = timer + ' seconds remaining';
                 if (timer <= 0) {
@@ -39,6 +55,10 @@
             // Disable all buttons
             const allButtons = document.querySelectorAll('button[id^="answerButton_"]');
             allButtons.forEach(button => button.disabled = true);
+
+            // Clear the timer
+            clearInterval(interval);
+
             const urlWithTimer = new URL(url);
             urlWithTimer.searchParams.append('timer', timer);
             fetch(urlWithTimer)
@@ -61,10 +81,10 @@
                                 button.classList.remove('green');
                             }
                         } else {
-
                             button.classList.remove('green', 'red');
                         }
                     });
+                    document.getElementById('next').style.display = 'inline-block';
                 })
                 .catch(error => {
                     console.error('There was a problem with the fetch operation:', error);

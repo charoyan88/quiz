@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::get('/', [SiteController::class,'index']);
+Route::get('/question/{id}', [SiteController::class,'question'])->name('question');
 Route::post('student', [SiteController::class,'student'])->name('student.create');
+Route::get('result', [SiteController::class,'result'])->name('result');
 Route::get('checkAnswer/{id}', [SiteController::class,'checkAnswer'])->name('checkAnswer');
 Route::prefix('admin')->group(function () {
     Route::get('/', [QuestionController::class,'index']);
